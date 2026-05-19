@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+env/
+.env
+*.egg-info/
+build/
+dist/
+telemetry/**/*.jsonl
+!telemetry/.gitkeep
+# Vendored third-party code: not committed; installed via scripts/bootstrap.sh
+third_party/
+# Editor / IDE
+.vscode/
+.idea/
+# Figures are kept (small, regenerable but useful as a baseline reference)
+.DS_Store

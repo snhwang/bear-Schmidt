@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "schmidt_demos"
+version = "0.1.0"
+description = "Schmidt Sciences Trustworthy AI (Tier 2) preliminary demos: BEAR-governed LLM-agent colonies under must-have enforcement on a multi-agent cyber-defense substrate (CybORG/CAGE 4)."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "pyyaml>=6.0",
+  "matplotlib>=3.7",
+  "scipy>=1.10",
+  # BEAR runtime deps required for Demo D (BEAR-advantage figure).
+  # Demos A, B, C run without these; they are pulled in here so the
+  # full demo trio + BEAR-advantage demo install in one shot.
+  "pydantic>=2.0",
+  "python-dotenv>=1.0",
+  "anthropic>=0.30",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+include = ["schmidt_demos*"]

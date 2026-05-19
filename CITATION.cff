@@ -1,0 +1,68 @@
+cff-version: 1.2.0
+message: "If you use this artifact, please cite it as below."
+title: "bear-Schmidt: reproducible BEAR cyber-substrate demos (A through F)"
+abstract: >
+  Six reproducible demonstrations that exercise the substrate-level
+  machinery of the BEAR (Behavioral Evolution And Retrieval) framework on
+  cyber telemetry: (A) typed-gene schema, must-have reinjection, and
+  per-must-have compliance telemetry C_m(t) on a closed-form-fitness
+  pilot; (B) BEAR-MiniCAGE bridge with NIST/OpenC2-grounded compliance
+  predicates against the Meander red agent on CAGE Challenge 2;
+  (C) two-strategy co-evolution kernel with corrected invasion-fitness
+  readout in single-defender and paired-defender variants;
+  (D) BEAR-advantage demo with per-defender Corpus and Retriever and
+  LLM-blended gene text at reproduction events, replicating the
+  qualitative form of a previously reported heritability result on a
+  cyber substrate; (E) generalization to CAGE Challenge 4 with five
+  zone defenders, four pre-registered conditions, and audit-log-derived
+  per-zone fitness; (F) decision-engine ablation in which a small
+  local LLM (gemma-4-E2B-it served by vLLM) picks each per-tick action
+  from gene-text directives, demonstrating that the substrate's
+  monotone compliance scaling under reinjection rate rho is not an
+  artifact of the rule-based decision engine used in Demos B and C.
+type: software
+authors:
+  - family-names: "Hwang"
+    given-names: "Scott N."
+    affiliation: "Penn State College of Medicine"
+  - family-names: "Tran"
+    given-names: "Truong X."
+    affiliation: "Penn State Harrisburg"
+keywords:
+  - retrieval-governed AI agents
+  - AI behavioral genomes
+  - multi-agent AI safety
+  - evolutionary AI safety
+  - AI agent populations
+  - CAGE Challenge
+  - autonomous cyber defense
+license: LicenseRef-OCVSAL-1.0
+license-url: "https://github.com/snhwang/bear/blob/main/LICENSE"
+version: "0.2.0-schmidt"
+date-released: "2026-05-13"
+references:
+  - type: article
+    title: "Measuring trust-property dynamics in evolving LLM-agent populations under adversarial selection"
+    authors:
+      - family-names: "Hwang"
+        given-names: "Scott N."
+      - family-names: "Tran"
+        given-names: "Truong X."
+    year: 2026
+    notes: "In preparation; companion paper for these demos."
+  - type: article
+    title: "Behavior genetics of LLM-agent populations: heritability, adversarial selection, and category-dependent conservation in a multi-generation evolutionary substrate"
+    authors:
+      - family-names: "Hwang"
+        given-names: "Scott N."
+    year: 2026
+    doi: "10.5281/zenodo.19866691"
+    notes: "In submission to PLOS ONE."
+  - type: article
+    title: "BEAR: Behavioral Evolution And Retrieval --- a heritable, composable governance substrate for LLM agents"
+    authors:
+      - family-names: "Hwang"
+        given-names: "Scott N."
+    year: 2026
+    doi: "10.5281/zenodo.19705464"
+    notes: "In submission to ACM Transactions on Intelligent Systems and Technology."

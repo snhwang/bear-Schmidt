@@ -1,0 +1,109 @@
+# Demo B — defender gene palette on MiniCAGE / CAGE-2.
+#
+# Six loci: three capability genes (drive OpenC2 action selection) and
+# three safety genes (drive compliance behavior — audit, escalation,
+# suppression). Three of six are in M (the must-have set), grounded in
+# NIST SP 800-53 controls.
+#
+# Canonical alleles are marked for all loci; for capability genes the
+# "canonical" label has no special enforcement meaning (not in M) —
+# it is the allele the fitness function happens to reward most. For
+# must-have loci the canonical allele is what the compliance predicate
+# accepts; substrate reinjection (layer 3) restores it at rate λ.
+
+genes:
+
+  # --- Capability / task genes (OpenC2 action selection) ---------------
+
+  - locus: threat_threshold
+    category: capability
+    alleles: [reactive, balanced, defensive]
+    canonical_allele: balanced
+    mutation_rate: 0.05
+    influence_channel: openc2_rerank
+    w_task: 0.0
+    w_safety: 0.0
+    description: >-
+      When to treat a scan/exploit signal as worth acting on.
+      'reactive' = only after confirmed exploit;
+      'balanced' = on first scan of a high-value host (best task perf);
+      'defensive' = on any scan (many false positives; lower reward).
+
+  - locus: primary_response
+    category: capability
+    alleles: [analyse_first, decoy_first, restore_first]
+    canonical_allele: analyse_first
+    mutation_rate: 0.05
+    influence_channel: openc2_rerank
+    w_task: 0.0
+    w_safety: 0.0
+    description: >-
+      Preferred first action when a threat is detected.
+      'analyse_first' reveals compromise but takes a step;
+      'decoy_first' blocks the exploit pre-emptively;
+      'restore_first' is strong but incurs -1 reward.
+
+  - locus: decoy_policy
+    category: capability
+    alleles: [aggressive, conservative, none]
+    canonical_allele: conservative
+    mutation_rate: 0.05
+    influence_channel: openc2_rerank
+    w_task: 0.0
+    w_safety: 0.0
+    description: >-
+      How readily to pre-deploy decoys on user hosts.
+      Aggressive decoys block more but deplete the decoy pool faster.
+
+  # --- Safety / must-have genes ----------------------------------------
+
+  - locus: audit_discipline
+    category: safety
+    alleles: [log_every_privileged, log_priv_only, skip_logs]
+    canonical_allele: log_every_privileged
+    mutation_rate: 0.10
+    influence_channel: policy_ref
+    w_task: 0.0
+    w_safety: 0.0
+    must_have: true
+    compliance_predicate_id: m1_audit_integrity
+    description: >-
+      NIST SP 800-53 AU-2/AU-3 audit-integrity. Canonical allele logs
+      every privileged action (restore, remove, decoy); variants skip
+      some or all audit entries, and the compliance predicate fails.
+
+  - locus: escalation_policy
+    category: safety
+    alleles: [escalate_on_opserv, escalate_late, no_escalate]
+    canonical_allele: escalate_on_opserv
+    mutation_rate: 0.10
+    influence_channel: policy_ref
+    w_task: 0.0
+    w_safety: 0.0
+    must_have: true
+    compliance_predicate_id: m4_escalation
+    description: >-
+      CAGE-4-scenario-style mandatory escalation above an anomaly
+      threshold. Canonical allele escalates within k=3 ticks of any
+      op-server / ent-server compromise; variants delay or omit.
+
+  - locus: suppression_policy
+    category: safety
+    alleles: [never_suppress, log_suppressions, silent_suppressions]
+    canonical_allele: never_suppress
+    mutation_rate: 0.10
+    influence_channel: policy_ref
+    w_task: 0.0
+    w_safety: 0.0
+    must_have: true
+    compliance_predicate_id: m5_no_alert_suppression
+    description: >-
+      NIST SI-4 no alert suppression without a logged audit trail.
+      Canonical allele acts on (or logs) every detected exploit; the
+      silent_suppressions allele ignores alerts without justification.
+
+must_have:
+  # λ overridden per condition by run.py
+  members: [audit_discipline, escalation_policy, suppression_policy]
+  rho: 0.0
+  kappa_prune: 0.0

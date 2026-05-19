@@ -1,0 +1,91 @@
+# Demo A — seeded genome (domain-general; 5 loci).
+#
+# Pre-registered gene palette used by run.py to produce the §3 figure.
+# Seeded-trait validation test (Aim 1 construct validity):
+#   - Introduce traits with known fitness effect and known starting frequency;
+#   - Run the colony under a controlled fitness regime;
+#   - Confirm p_g(t) matches the deterministic selection-wave prediction and
+#     C_m(t) matches the expected step pattern under λ ∈ {0, 0.5, 1}.
+#
+# Alleles are discrete at Demo A; Demo B/C inherit the same schema but
+# the alleles become heritable structured-prompt / tool-use fragments
+# compatible with the LLM-in-CAGE4 precedent (Farinha et al. 2025).
+
+genes:
+  # --- Task-relevant (capability) -------------------------------------
+  - locus: task_alpha
+    category: capability
+    alleles: [canonical, variant]
+    canonical_allele: canonical
+    mutation_rate: 0.01
+    influence_channel: soft_gate
+    w_task: 0.5
+    w_safety: 0.0
+    description: >-
+      Capability-category trait with a direct task-fitness contribution;
+      under task-only selection its canonical allele rises per the
+      selection-wave recursion.
+
+  - locus: task_beta
+    category: capability
+    alleles: [canonical, variant]
+    canonical_allele: canonical
+    mutation_rate: 0.01
+    influence_channel: planner_hook
+    w_task: 0.3
+    w_safety: 0.0
+    description: >-
+      Secondary task-relevant capability gene; smaller effect than
+      task_alpha. Used to show the breeder's equation fits multiple
+      concurrent selection strengths simultaneously.
+
+  # --- Free-genome safety (not in M) ----------------------------------
+  - locus: free_safety_vigilance
+    category: safety
+    alleles: [canonical, variant]
+    canonical_allele: canonical
+    mutation_rate: 0.01
+    influence_channel: soft_gate
+    w_task: 0.0
+    w_safety: 0.4
+    description: >-
+      Safety-critical gene NOT in M. Under task-only selection it drifts
+      (no reward wired to it); under task+safety co-selection it rises
+      per the breeder's-equation prediction.
+
+  # --- Must-have (in M; reinjected at rate λ) -------------------------
+  - locus: must_have_audit
+    category: safety
+    alleles: [canonical, variant]
+    canonical_allele: canonical
+    mutation_rate: 0.05
+    influence_channel: policy_ref
+    w_task: 0.0
+    w_safety: 0.0
+    must_have: true
+    compliance_predicate_id: audit_log_present
+    description: >-
+      Must-have m ∈ M — canonical-allele compliance corresponds to the
+      NIST AU-2/AU-3 audit-integrity invariant. No direct fitness
+      contribution; maintenance depends entirely on substrate
+      reinjection at rate λ. Higher mutation rate (0.05) makes the
+      λ=0 decay visible within the 50-generation horizon.
+
+  # --- Neutral (drift control) ----------------------------------------
+  - locus: neutral_style
+    category: style
+    alleles: [canonical, variant]
+    canonical_allele: canonical
+    mutation_rate: 0.01
+    influence_channel: soft_gate
+    w_task: 0.0
+    w_safety: 0.0
+    description: >-
+      Style-category drift control — no fitness contribution in any
+      regime. Its trajectory is the Wright-Fisher neutral baseline
+      against which selected traits are visually compared.
+
+must_have:
+  members: [must_have_audit]
+  rho: 0.0   # overridden by run.py per condition (0, 0.5, 1)
+  kappa_prune: 0.0

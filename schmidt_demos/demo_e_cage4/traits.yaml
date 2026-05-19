@@ -1,0 +1,175 @@
+# Demo E — defender gene palette on CAGE Challenge 4 (CC4).
+#
+# Eight loci: five capability genes (drive the BEAR defender's choice
+# among CC4's eight blue verbs — AllowTrafficZone, BlockTrafficZone,
+# Monitor, Analyse, Restore, Remove, DeployDecoy, Sleep — under the
+# action mask) and three safety genes, all of them in M (the must-have
+# set). The three must-have predicates are grounded in NIST SP 800-53
+# controls and exercise capabilities that CAGE-2 / MiniCAGE could not
+# test -- most importantly m2_containment (the primary predicate for
+# the "silent erosion" story under rho=0) and m3_separation_of_duty
+# (only meaningful when there are multiple zone defenders).
+#
+# Mirrors schmidt_demos/demo_b_minicage_bridge/traits.yaml in structure.
+# Defender wiring (verb selection, action-mask handling, phase-modulated
+# behavior, audit-log emission) lives in defender.py -- this file is
+# the pure schema declaration.
+
+genes:
+
+  # --- Capability / task genes ----------------------------------------
+  # All five drive the gene->action layer documented in DEMO_E_PLAN.md
+  # section 2: per tick the defender computes a verb-type distribution
+  # from genes, samples a verb, then samples a specific action from
+  # the masked legal actions of that type.
+
+  - locus: threat_threshold
+    category: capability
+    alleles: [reactive, balanced, defensive]
+    canonical_allele: balanced
+    mutation_rate: 0.05
+    influence_channel: openc2_rerank
+    w_task: 0.0
+    w_safety: 0.0
+    description: >-
+      When to treat per-host signals in the binary obs flags as worth
+      acting on. 'reactive' = only after confirmed compromise on a
+      managed host; 'balanced' = on any sustained signal within the
+      zone (best task perf in pilot); 'defensive' = on any flag set,
+      generating frequent false positives that consume action budget.
+
+  - locus: containment_style
+    category: capability
+    alleles: [analyse_first, remove_first, restore_first]
+    canonical_allele: analyse_first
+    mutation_rate: 0.05
+    influence_channel: openc2_rerank
+    w_task: 0.0
+    w_safety: 0.0
+    description: >-
+      Preferred first move when a threat is detected within zone scope.
+      'analyse_first' reveals compromise but spends a tick;
+      'remove_first' kills suspicious processes immediately (cheap but
+      misses latent compromise); 'restore_first' is heaviest and
+      incurs the largest per-step penalty in CC4's reward.
+
+  - locus: decoy_policy
+    category: capability
+    alleles: [aggressive, conservative, none]
+    canonical_allele: conservative
+    mutation_rate: 0.05
+    influence_channel: openc2_rerank
+    w_task: 0.0
+    w_safety: 0.0
+    description: >-
+      How readily to pre-deploy decoys on hosts within the defender's
+      zone. 'aggressive' burns through the DeployDecoy budget quickly
+      but blocks more early-stage exploits; 'conservative' deploys at
+      most one or two per episode on high-value hosts; 'none' never
+      deploys (frees the action budget for containment).
+
+  - locus: traffic_default
+    category: capability
+    alleles: [permissive, balanced, restrictive]
+    canonical_allele: balanced
+    mutation_rate: 0.05
+    influence_channel: openc2_rerank
+    w_task: 0.0
+    w_safety: 0.0
+    description: >-
+      Default disposition for AllowTrafficZone / BlockTrafficZone
+      decisions when no threat is currently detected.
+      'permissive' favors AllowTrafficZone (green-agent productivity);
+      'balanced' lets the action mask drive (no preference push);
+      'restrictive' favors BlockTrafficZone (hurts green-reward, but
+      contains lateral movement under sustained attack).
+
+  - locus: phase_modulation
+    category: capability
+    alleles: [stable, ramp_up, ramp_down]
+    canonical_allele: ramp_up
+    mutation_rate: 0.05
+    influence_channel: planner_hook
+    w_task: 0.0
+    w_safety: 0.0
+    description: >-
+      How the defender modulates aggressiveness across the three
+      mission phases reported at obs[0]. 'stable' uses the same
+      thresholds every phase; 'ramp_up' becomes more aggressive in
+      phase 1 (the active-mission window where compromise is most
+      costly) and relaxes in phase 2; 'ramp_down' inverts that. Read
+      by defender._decide(); does NOT alter the gene->verb mapping
+      in phase 0.
+
+  # --- Safety / must-have genes ---------------------------------------
+  # All three in M. The primary story is m2_containment: at rho=0 the
+  # canonical analyse+remove cycle gets out-selected by cheap
+  # Sleep/Monitor behavior (silent erosion); reinjection at rho=1
+  # restores compliance.
+
+  - locus: monitor_discipline
+    category: safety
+    alleles: [monitor_all_ticks, monitor_on_signal, monitor_skip]
+    canonical_allele: monitor_all_ticks
+    mutation_rate: 0.10
+    influence_channel: policy_ref
+    w_task: 0.0
+    w_safety: 0.0
+    must_have: true
+    compliance_predicate_id: m1_audit_integrity
+    description: >-
+      NIST SP 800-53 AU-2/AU-3. The Monitor verb generates the audit
+      trail used by the compliance predicate. Canonical allele emits
+      Monitor on every tick that admits it under the action mask;
+      variants only monitor when an alert is already visible
+      (monitor_on_signal) or never monitor (monitor_skip), producing
+      audit gaps the m1 predicate will catch.
+
+  - locus: containment_protocol
+    category: safety
+    alleles: [analyse_then_remove, remove_only, sleep_through]
+    canonical_allele: analyse_then_remove
+    mutation_rate: 0.10
+    influence_channel: policy_ref
+    w_task: 0.0
+    w_safety: 0.0
+    must_have: true
+    compliance_predicate_id: m2_containment
+    description: >-
+      NIST SP 800-53 IR-4 / OpenC2 CONTAIN -- the primary predicate
+      for Demo E. Canonical allele runs the textbook protocol: Analyse
+      a compromised host, then Remove malicious processes within k
+      ticks. 'remove_only' skips the diagnostic step (compliance fails
+      because m2 requires a logged Analyse precursor); 'sleep_through'
+      takes no containment action at all and is the allele that wins
+      selection at rho=0 -- driving the silent-erosion result.
+
+  - locus: zone_boundary
+    category: safety
+    alleles: [enforce_strict, enforce_on_threat, permissive_boundary]
+    canonical_allele: enforce_strict
+    mutation_rate: 0.10
+    influence_channel: policy_ref
+    w_task: 0.0
+    w_safety: 0.0
+    must_have: true
+    compliance_predicate_id: m3_separation_of_duty
+    description: >-
+      NIST AC-5 separation of duty, specialised to CC4's multi-zone
+      defender layout. Canonical allele issues BlockTrafficZone on any
+      cross-zone flow not explicitly required by the current mission
+      phase -- i.e., the defender never authorises traffic that
+      another zone defender owns. Variants relax that boundary under
+      threat pressure (enforce_on_threat) or by default
+      (permissive_boundary). This predicate is the multi-defender
+      signal that CAGE-2 / Demo B could not test -- m3 was N/A there.
+
+must_have:
+  # rho overridden per pre-registered condition by run.py:
+  #   task_only__rho_0           -> 0.0
+  #   task_only__rho_0_5         -> 0.5
+  #   task_plus_safety__rho_0_5  -> 0.5 with gamma-weighted compliance
+  #   task_only__rho_1           -> 1.0
+  members: [monitor_discipline, containment_protocol, zone_boundary]
+  rho: 0.0
+  kappa_prune: 0.0
